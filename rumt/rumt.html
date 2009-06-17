@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC
+  "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html lang="en">
+<head>
+<title>Running Unix Memory Test</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+
+<h1>Running Unix Memory Test</h1>
+
+<h2>What is RUMT?</h2>
+
+<p>
+The goal of RUMT is to check the memory of a computer over a long period of
+time and almost-real load conditions without having to interrupt the
+services.
+</p>
+
+<p>
+RUMT exploits the possibility of some Unix kernels to selectivly disable
+some memory areas while still accessing them through the
+<code>/dev/mem</code> device. The principle of RUMT is to write
+pseudo-random data in these disabled memory areas, and later check them.
+This principle and the original code for the deterministic pseudo-random
+generator are from
+<a href="http://www.eleves.ens.fr:8080/home/madore/">David Madore</a>.
+</p>
+
+<p>
+This distribution contains another variant on the same theme: URUMT
+allocates a large chunk of memory, locks it in memory using the
+<code>mlock</code>(2) system call, and scans <code>/dev/mem</code> to find
+where in physical memory the allocated area is. Then it continuously runs
+the same tests in that memory.
+</p>
+
+<p>
+URUMT can not be used to test a particular area of memory: the kernel will
+give it whatever physical memory it feels like. But URUMT can be restarted
+now and then, hopefully getting different physical memory each time. This is
+perfect if you suspect you have bad bits, but do not know at all where they
+are. Once you have sighted the bad bits, you can use a plain RUMT to test
+more extensively the neighborhood.
+</p>
+
+<h2>How to use RUMT?</h2>
+
+<h3><code>rumt_trymem</code></h3>
+
+<p>
+The core of RUMT is <code>rumt_trymem</code>, which accepts the following
+options:
+</p>
+<ul>
+<li><code>-d <var>device</var></code>: use <var>device</var> instead of
+  <code>/dev/mem</code>.</li>
+<li><code>-i <var>input seed</var></code>: check the memory areas according to
+  <var>input seed</var>.</li>
+<li><code>-o <var>output seed</var></code>: prepare the memory areas according
+  to <var>output seed</var>.</li>
+</ul>
+<p>
+The remaining arguments are memory areas, with one of the syntax
+<code>start+length</code> or <code>start-end</code> (where end is excluded).
+Values can be suffixed with <code>k</code>, <code>M</code> or <code>p</code>
+for kilobytes, megabytes or pages (usually 4kB, cf. <code>getconf
+  PAGE_SIZE</code>). All values must be multiples of the page size.
+</p>
+
+<p>
+The normal way to use RUMT is to call <code>rumt_trymem -o
+<var>some_seed</var></code> on the disabled memory areas, wait some time and
+then call <code>rumt_trymem -i</code> with the same seed on the same memory
+areas. If nothing has changed, <code>rumt_trymem</code> will be silent. If
+something has changed, the detected bad bits will be printed as
+<code>0xAAAAAAAAAAAA.b±</code> with <code>AAAAAAAAAAAA</code> the address,
+<code>b</code> the bit, and <code>±</code> the direction (<code>+</code> for
+a bit that should be 0 and is 1, <code>-</code> else).
+</p>
+
+<p>
+<strong>Beware!</strong> Calling <code>rumt_trymem -o</code> on memory areas
+used by the system will likely cause crashes or data loss. Triple check your
+arguments.
+</p>
+
+<h3><code>rumt_daemon</code></h3>
+
+<p>
+<code>rumt_daemon</code> is a shell script that calls
+<code>rumt_trymem</code>, keeps track of the seed, and keeps a nice table of
+detected bad bits. It can be configured using the <code>rumt.conf</code>
+auxiliary script. See the comments in this script for options.
+</p>
+
+<h3><code>urumt</code></h3>
+
+<p>
+The standar way to run <code>urumt</code> is <code>urumt -p
+  <var>num_pages</var></code>, where <var>num_pages</var> is the number of
+pages to allocate and test. A typical value may be on eighth or one quarter
+of your total physical memory. <code>urumt</code> will print some diagnosis
+and start testing. It records its results in a file called
+<code>urumt_stats</code> whose size is eight bytes per page of physical
+memory (not tested memory). If bad bits are found, a message will also be
+printed.
+</p>
+
+<p>
+<code>urumt</code> accepts the followihg options:
+</p>
+<ul>
+<li><code>-s <var>stats_file</var></code>: selects the file where statistics
+  are stored.</li>
+<li><code>-m <var>mem_device</var></code>: selects an alternate path for a
+  <code>/dev/mem</code>-like device.</li>
+<li><code>-d <var>delay</var></code>: selects the time (in microseconds)
+  between series of tests.</li>
+<li><code>-D <var>delay_modulus</var></code>: selects the number of pages
+  to test between each sleep. Thus, the total time to test all page will be
+  approximatively
+  <var>num_pages</var>×<var>delay</var>/<var>delay_modulus</var> (in
+  microseconds). The default value for <var>delay</var> is 900 (which will
+  probably be rounded up to one time slice) and 1 for
+  <var>delay_modulus</var>.</li>
+<li><code>-b <var>max_bad_bits</var></code>: if <code>urumt</code> finds
+  more than <var>max_bad_bits</var> in one page at once, it will print a
+  message and exit. The reason for that is that memory is normally not
+  <em>that</em> bad, but the internal data structures can themselves land on
+  bad bits and get corrupted; if that happen, you do not want your
+  statistics ruined.</li>
+<li><code>-S</code>: diverts all messages to syslog; the facility is
+  local0.</li>
+<li><code>-P</code>: <code>urumt</code> will not run any test, but print its
+  statistics file; the first column is the page number (in hexadecimal), the
+  second column is the total number of times that page has been tested, the
+  third column is the total number of errors found in that page.</li>
+</ul>
+
+<p>
+It should be ok to run two <code>urumt</code> at the same time on the same
+statistics file, since they will get distinct pages. If you restart
+<code>urumt</code> to change the memory area being tested, it is probably a
+good idea to start the new one before killing the first one, since it would
+guarantee a totally new area (of course, if you're trying to check half your
+memory at once, it will probably fail).
+</p>
+
+<h3><code>rumt_fusion</code></h3>
+
+<p>
+This is a perl script used by <code>rumt_daemon</code> to beautify the list
+of bad bits.
+</p>
+
+<h3><code>highmem.o</code></h3>
+
+<p>
+On Linux, for those who have more than 960MB of memory and so enabled the
+<code>CONFIG_HIGHMEM</code> option, <code>/dev/mem</code> gives access to
+only the first 768MB. This kernel module creates
+<code>/dev/misc/highmem</code> which does not have this limit.
+</p>
+
+<p>
+Beware. This code has been tested on my box without crashing it. It has also
+been posted on LKML, but got no answer. I do not know if it is compatible
+with the <code>CONFIG_HIGHMEM64G</code> option. Use at your own risks.
+</p>
+
+<p>
+Beware (bis). This code has not been ported nor tested with 2.6 kernels.
+</p>
+
+<h3><code>print_holes_linux</code></h3>
+
+<p>
+This perl script will parse the boot messages of a Linux kernel to guess its
+command lines options and disabled memory areas. It prints one line with the
+<code>mem=</code> arguments to the kernel, and one line with the disabled
+areas in a format suitable for <code>rumt_trymem</code>.
+</p>
+
+<p>
+You should double-check the former with your Grub/LILO/whatever
+configuration <em>and</em> your <code>/proc/cmdline</code> before using the
+later.
+</p>
+
+<h2>What is the status of RUMT?</h2>
+
+<p>
+RUMT works for me at home with a 2.4.20 Linux kernel;
+<code>rumt_trymem</code> and the shell scripts should be quite portable.
+There is no installation procedure: is started from its compilation
+directory; anyway, RUMT is not a program that one wants to use now and then.
+</p>
+
+<p>
+I do not intend to make RUMT a well-packaged program: I will program it
+until I find my bad memory bits, and that's all. I give it to the comunity
+as is, and whoever wants to enhance it is welcome.
+</p>
+
+<h2>Author</h2>
+
+<p>
+<a href="http://www.eleves.ens.fr/home/george/">Nicolas George</a>
+</p>
+
+</body>
+</html>

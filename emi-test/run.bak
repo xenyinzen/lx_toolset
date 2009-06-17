@@ -1,0 +1,18 @@
+
+#!/bin/sh
+
+echo "Burnning..."
+echo "please press Ctrl+C to quit"
+cp linux.tar.gz /tmp
+./video/runcat &
+./cpu-mem-ide-burn.sh &
+
+while [ 1 == 1 ]; do
+	./video/runcat
+	#./video/run-video &
+	#./cpu-mem-ide-burn.sh &
+done
+
+sleep 240
+#killall cpu-mem-ide-burn.sh
+exit 0

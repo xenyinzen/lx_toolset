@@ -1,0 +1,100 @@
+
+#!/bin/sh
+
+echo "Burnning..."
+
+rm /frt-log.txt
+echo "Start time:" `date` >> /frt-log.txt
+rm /tmp/frt-burn-error
+
+mkdir /burn-tmp
+mount -t tmpfs none /burn-tmp
+cp linux.tar.gz /burn-tmp
+
+./runwifi.sh &
+
+./runcat.sh &
+
+./cpu-mem-ide-burn.sh &
+
+
+i="0"
+# run in for 4 hours, so the following number is 240
+while [ $i -lt 240  ]; do
+#while [ $i -lt 2  ]; do
+	sleep 60
+	if [ -f /tmp/frt-burn-error ] ; then
+		RUN2=`ps aux | grep runwifi.sh | grep -v grep | awk '{print $2}'`
+		RUN=`ps aux | grep runcat.sh | grep -v grep | awk '{print $2}'`
+		RUN1=`ps aux | grep cpu-mem-ide-burn.sh | grep -v grep | awk '{print $2}'`
+		kill -9 $RUN > /dev/null
+		if [ "$RUN1" == "" ] ; then
+			a=""
+		else
+			kill -9 $RUN1 > /dev/null
+		fi
+		if [ "$RUN2" == "" ] ; then
+			a=""
+		else
+			kill -9 $RUN2 > /dev/null
+		fi
+		echo "Error time:" `date` >> /frt-log.txt
+		clear
+		echo
+		echo
+		echo "==================================================== "
+		echo 
+		echo "########    ###    #### ##       ######## ########  "
+		echo "##         ## ##    ##  ##       ##       ##     ## "
+		echo "##        ##   ##   ##  ##       ##       ##     ## "
+		echo "######   ##     ##  ##  ##       ######   ##     ## "
+		echo "##       #########  ##  ##       ##       ##     ## "
+		echo "##       ##     ##  ##  ##       ##       ##     ## "
+		echo "##       ##     ## #### ######## ######## ########  "
+		echo
+		echo "==================================================== "
+		echo
+		echo
+		echo
+
+		umount /burn-tmp
+		exit 1;
+	fi
+	i=$[$i+1]
+done
+
+RUN2=`ps aux | grep runwifi.sh |grep -v grep | awk '{print $2}'`
+RUN=`ps aux | grep runcat.sh |grep -v grep | awk '{print $2}'`
+RUN1=`ps aux | grep cpu-mem-ide-burn.sh | grep -v grep | awk '{print $2}'`
+kill -9 $RUN > /dev/null
+if [ "$RUN1" == "" ] ; then
+	a=""
+else
+	kill -9 $RUN1 > /dev/null
+fi
+if [ "$RUN2" == "" ] ; then
+	a=""
+else
+	kill -9 $RUN2 > /dev/null
+fi
+	echo "End time:" `date` >> /frt-log.txt
+clear
+echo
+echo
+echo "================================================ "
+echo ""
+echo "        ########      ###      ######    ######  "
+echo "        ##     ##    ## ##    ##    ##  ##    ## "
+echo "        ##     ##   ##   ##   ##        ##       "
+echo "        ########   ##     ##   ######    ######  "
+echo "        ##         #########        ##        ## "
+echo "        ##         ##     ##  ##    ##  ##    ## "
+echo "        ##         ##     ##   ######    ######  "
+echo ""
+echo "================================================ "
+echo
+echo
+echo
+
+umount /burn-tmp
+exit 0

@@ -1,0 +1,35 @@
+#!/bin/sh
+
+./videoram-test 
+#ret=$?
+#if [ $ret != 0 ] ; then
+#	log_error VID01
+#fi
+sleep 1
+
+cd fbtest
+./fbtest -t 1 1>/dev/null 2>&1
+#ret=$?
+#if [ $ret != 0 ]; then
+#	log_error VID02
+#fi
+sleep 1
+
+cd fbtest
+./fbtest -t 2 1>/dev/null 2>&1
+#ret=$?
+#if [ $ret != 0 ]; then
+#	log_error VID03
+#fi
+sleep 1
+
+cd ../showbitmap
+./showbitmap logo.bmp -t 2 1>/dev/null 2>&1
+#ret=$?
+#if [ $ret != 0 ]; then
+#	log_error VID04
+#fi
+sleep 1
+
+exit $ret
+

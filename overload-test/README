@@ -1,0 +1,13 @@
+Overhead Test Script Package
+Lemote 
+2008.3.31
+
+1. Note:
+Before start test, you should configure the scp RSA secret keys
+ in your machine and your server, and modify the file punish_netcard.sh to 
+ match your network configures.
+
+2. run
+./test.sh
+to start test
+

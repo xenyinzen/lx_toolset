@@ -1,0 +1,47 @@
+#!/usr/bin/perl -w
+###########################################################################
+# Running Unix Memory Test
+# (C) Nicolas George - 2003
+# rumt_fustion: union of the known and old bad bits
+###########################################################################
+
+use strict;
+
+my ($stamp, $old, $new, $out) = @ARGV;
+die "Usage: $0 stamp old new\n" unless defined $out;
+
+my %bits = ();
+my %stamp = ();
+my $is_new = 0;
+
+die "$old: $!\n" unless open F, "<$old";
+while(<F>) {
+  die "$old:$.: syntax error\n" unless /^(0x[0-9A-F]+\.\d+)([+*-])(.*)\n$/i;
+  $bits{$1} = $2;
+  $stamp{$1} = $3;
+}
+close F;
+
+die "$new: $!\n" unless open F, "<$new";
+while(<F>) {
+  die "$new$.: syntax error\n" unless /^(0x[0-9A-F]+\.\d+)([+-])\n$/i;
+  my ($b, $s) = ($1, $2);
+  if(exists $bits{$b}) {
+    if($bits{$b} ne "*" && $bits{$b} ne $s) {
+      $bits{$b} = "*";
+      $is_new = 1;
+    }
+  } else {
+    $bits{$b} = $s;
+    $stamp{$b} = $stamp;
+    $is_new = 1;
+  }
+}
+close F;
+
+exit 0 unless $is_new;
+die "$out: $!\n" unless open F, ">$out";
+for my $b (sort keys %bits) {
+  print F $b, $bits{$b}, $stamp{$b}, "\n";
+}
+close F;

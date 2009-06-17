@@ -1,0 +1,83 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH LUVCVIEW 1 "June 19, 2007"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH "NAME"
+luvcview \- USB Video Class grabber
+.SH SYNOPSIS
+.BI luvcview
+[\fIoptions\fR]
+.SH "DESCRIPTION"
+.PP
+.B luvcview 
+is a camera viewer for UVC based webcams. It includes an mjpeg
+decoder and is able to save the video stream as an AVI file.
+
+.SH "OPTIONS"
+A summary of options is included below.
+.TP
+.B \-c
+Enable raw frame capturing for the first frame.
+.TP
+.B \-C      
+Enable raw frame stream capturing from the start.
+.TP
+.B \-d \fI/dev/videoX\fR
+Specify the video device to use.
+.TP
+.B \-f \fIformat\fR
+Specify the video device to use.
+.RS
+.TP
+.I jpg
+JPEG format (default)
+.TP
+.I yuv
+YUV format
+.RE
+.TP
+.B \-g 
+Grab the images with READ method instead of default MMAP
+.TP
+.B \-h
+Print a help text and exit.
+.TP
+.B \-L
+Query valid video formats.
+.TP
+.B \-l
+Query valid controls and settings
+.TP
+.B \-o \fIoutputfile\fR
+Create an AVI file with the stream received from the video device.
+.TP
+.B \-r
+Read and set control settings from luvcview.cfg
+.TP
+.B \-s \fIwidth\fRx\fIheight\fR
+Select the image input size
+.TP
+.B \-S
+Enable raw stream capturing from the start.
+
+.SH "AUTHORS"
+.PP
+Laurent Pinchart && Michel Xhaard.
+.PP
+This manual page was originaly written by Aurelien Jarno <aurel32@debian.org>,
+for the Debian GNU/Linux system (but may be used by others).
+
+

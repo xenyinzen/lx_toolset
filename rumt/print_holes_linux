@@ -1,0 +1,75 @@
+#!/usr/bin/perl -w
+
+use strict;
+use POSIX "uname";
+
+die "dmesg: $!\n" unless open D, "dmesg|";
+
+my @bios = ();
+my @user = ();
+
+my @uname = uname;
+
+while(<D>) {
+  if(/^\s*(\S+):\s+([0-9a-fA-F]+)\s*-\s*([0-9a-fA-F]+)\s+\(usable\)/) {
+    my ($source, $start, $end) = ($1, hex $2, hex $3);
+    if($source eq "BIOS-e820") {
+      push @bios, [$start, $end];
+    } elsif($source eq "user") {
+      push @user, [$start, $end];
+    }
+  }
+}
+
+die "No BIOS memory map nor user memory map." .
+  "Maybe we are not a Linux, or a too old one.\n" if $#bios < 0 && $#user < 0;
+
+sub check_areas {
+  my ($name, @area) = @_;
+  my @r = ();
+  my $old = -1;
+  for my $a (@area) {
+    next if $a->[0] < 0x100000 && $a->[1] < 0x100000;
+    die "$name map: inverted interval\n" if $a->[0] >= $a->[1];
+    die "$name map: interval around 1M\n" if $a->[0] < 0x100000;
+    die "$name map: unsorted intervals\n" if $a->[0] <= $old;
+    die "$name map: interval not on kb boundary" if
+      $a->[0] % 1024 || $a->[1] % 1024;
+    $old = $a->[1];
+    push @r, $a;
+  }
+  return @r;
+}
+
+@bios = check_areas "BIOS", @bios;
+@user = check_areas "user", @user;
+
+my $bios = shift @bios;
+my @holes = ();
+for my $u (@user) {
+  while(defined($bios) && $u->[0] > $bios->[1]) {
+    push @holes, $bios;
+    $bios = shift @bios;
+  }
+  die "User area not inside BIOS interval\n" unless defined($bios) &&
+    $u->[0] >= $bios->[0] && $u->[1] <= $bios->[1];
+  push @holes, [$bios->[0], $u->[0]] if $u->[0] > $bios->[0];
+  $bios->[0] = $u->[1];
+  $bios = shift @bios if $bios->[0] == $bios->[1];
+}
+if(defined $bios) {
+  push @holes, $bios, @bios;
+}
+
+for my $u (@user) {
+  if($u->[0] == 0x100000) {
+    printf "mem=%dk ", $u->[1] / 1024;
+  } else {
+    printf "mem=%dk@%dk ", ($u->[1] - $u->[0]) / 1024, $u->[0] / 1024;
+  }
+}
+print "\n";
+for my $h (@holes) {
+  printf "0x%xk+%dk ", $h->[0] / 1024, ($h->[1] - $h->[0]) / 1024;
+}
+print "\n";

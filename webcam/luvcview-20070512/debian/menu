@@ -1,0 +1,6 @@
+?package(luvcview):\
+        needs="X11"\
+        section="Applications/Video"\
+        title="luvcview"\
+	longtitle="camera viewer for UVC based webcams"\
+        command="/usr/bin/luvcview"

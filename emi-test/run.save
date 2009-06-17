@@ -1,0 +1,18 @@
+
+#!/bin/sh
+
+echo "Burnning..."
+echo "please press Ctrl+C to quit"
+cp linux.tar.gz /tmp
+./cpu-mem-ide-burn.sh 
+./lcd-burn.sh
+
+while [ $i -lt 240 ] 
+do
+	sleep 10
+	./test_burn.sh
+	if [ $? == 0 ] ; then
+	
+	#killall cpu-mem-ide-burn.sh
+done
+exit 0

@@ -1,0 +1,17 @@
+luvcview (20070512-3) unstable; urgency=low
+
+  * Build with -g  (closes: bug#437544). 
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 13 Aug 2007 11:08:00 +0200
+
+luvcview (20070512-2) unstable; urgency=low
+
+  * Update the menufile following the new Debian menu subpolicy. 
+
+ -- Aurelien Jarno <aurel32@debian.org>  Mon, 30 Jul 2007 19:20:18 +0200
+
+luvcview (20070512-1) unstable; urgency=low
+
+  * Initial Release (closes: #429735).
+
+ -- Aurelien Jarno <aurel32@debian.org>  Wed, 20 Jun 2007 12:27:44 +0200

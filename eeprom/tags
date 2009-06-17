@@ -1,0 +1,39 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+BITS16	eeprom.c	31;"	d	file:
+Cfg9346	eeprom.c	45;"	d	file:
+EE_CS	eeprom.c	55;"	d	file:
+EE_DATA_READ	eeprom.c	60;"	d	file:
+EE_DATA_WRITE	eeprom.c	57;"	d	file:
+EE_ENB	eeprom.c	61;"	d	file:
+EE_ERASE_CMD	eeprom.c	52;"	d	file:
+EE_READ_CMD	eeprom.c	51;"	d	file:
+EE_SHIFT_CLK	eeprom.c	56;"	d	file:
+EE_WDS_CMD	eeprom.c	50;"	d	file:
+EE_WEN_CMD	eeprom.c	48;"	d	file:
+EE_WRITE_0	eeprom.c	58;"	d	file:
+EE_WRITE_1	eeprom.c	59;"	d	file:
+EE_WRITE_CMD	eeprom.c	49;"	d	file:
+EREASE_EEPROM	eeprom.c	25;"	d	file:
+MAC_	eeprom.c	27;"	d	file:
+NETCARD_TYPE	eeprom.c	38;"	d	file:
+READ_	eeprom.c	19;"	d	file:
+RTL_W8	eeprom.c	69;"	d	file:
+SIZE	eeprom.c	44;"	d	file:
+WRITE_	eeprom.c	21;"	d	file:
+eeprom_delay	eeprom.c	66;"	d	file:
+gethex	eeprom.c	/^int gethex(int *vp, char *p, int n)$/;"	f
+inb	eeprom.c	65;"	d	file:
+inl	eeprom.c	63;"	d	file:
+main	eeprom.c	/^int main (int ac, char *av[]){$/;"	f
+myoutb	eeprom.c	64;"	d	file:
+read_eeprom	eeprom.c	/^static int read_eeprom(int ioaddr, int location) {$/;"	f	file:
+write	eeprom.c	68;"	d	file:
+write_eeprom	eeprom.c	/^int write_eeprom(long ioaddr, int location,unsigned short data)$/;"	f
+write_eeprom8	eeprom.c	/^int write_eeprom8(long ioaddr, int location,unsigned short data)$/;"	f
+write_eeprom_disable	eeprom.c	/^static void write_eeprom_disable(unsigned long ioaddr)$/;"	f	file:
+write_eeprom_enable	eeprom.c	/^static void write_eeprom_enable(long ioaddr){$/;"	f	file:

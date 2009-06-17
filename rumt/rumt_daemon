@@ -1,0 +1,86 @@
+#!/bin/sh
+###########################################################################
+# Running Unix Memory Test
+# (C) Nicolas George - 2003
+# rumt_daemon: superviser program
+###########################################################################
+
+RUMT_CONF=./rumt.conf
+
+. $RUMT_CONF || exit 1
+
+
+#
+# Postconfiguration: traduction from userfriendly configuration parameters
+# to useful format.
+#
+
+# Unit for $INTERVAL
+case "$INTERVAL" in
+  (*s) INTERVAL="${INTERVAL%s}";;
+  (*m) INTERVAL=`expr "${INTERVAL%m}" '*' 60`;;
+  (*h) INTERVAL=`expr "${INTERVAL%h}" '*' 3600`;;
+  (*)
+    echo "Invalid INTERVAL." >&2
+    exit 1;;
+esac
+
+# Check the command line
+case "`uname -s`" in
+  (Linux) REAL_CMDLINE="`cat /proc/cmdline`";;
+  (*)
+    echo "Unknown OS, unable to fetch command line." >&2
+    exit 1;;
+esac
+if [ "x$KERNEL_CMDLINE" != "x$REAL_CMDLINE" ]; then
+  echo "Kernel command line does not match. Please check the config." >&2
+  exit 1
+fi
+
+# Prepare bad bits file
+[ -f $BAD_BITS ] || touch $BAD_BITS || exit $?
+
+# Redirect input and output
+exec < /dev/null
+if [ -n "$LOG_FILE" ]; then
+  exec > "$LOG_FILE" || exit 1
+  exec 2>&1
+fi
+
+count_lines() {
+  set `wc -l $1`
+  nl="$1"
+}
+
+OLD_SEED=""
+while true; do
+  SEED="`date '+%Y%m%d-%H%M%S'`"
+  if [ -z "$OLD_SEED" ]; then
+    $RUMT_TRYMEM -o "$SEED" $MEMORY_AREAS || exit $?
+    echo "$SEED: memory prepared"
+  else
+    $RUMT_TRYMEM -i "$OLD_SEED" -o "$SEED" $MEMORY_AREAS > $TRYMEM_OUT || \
+      exit $?
+    echo "$OLD_SEED: memory checked"
+    if [ -s $TRYMEM_OUT ]; then
+      count_lines $TRYMEM_OUT
+      nl_bad=$nl
+      count_lines $BAD_BITS
+      nl_old=$nl;
+      $RUMT_FUSION " $SEED" $BAD_BITS $TRYMEM_OUT $BAD_BITS.new
+      if [ -f $BAD_BITS.new ]; then
+	count_lines $BAD_BITS.new
+	nl_new=$nl;
+	nl_diff=`expr $nl_new - $nl_old`
+	echo "$nl_bad bad bits, $nl_diff new."
+	mv $BAD_BITS $BAD_BITS.old || exit $?
+	mv $BAD_BITS.new $BAD_BITS || exit $?
+      else
+	echo "$nl_bad bad bits, nothing new."
+      fi
+    fi
+    echo "$SEED: memory prepared"
+  fi
+  OLD_SEED="$SEED"
+  sleep $INTERVAL
+done

@@ -1,0 +1,13 @@
+Package: luvcview
+Version: 20070512-3
+Section: x11
+Priority: optional
+Architecture: mipsel
+Depends: libc6 (>= 2.3.5-1), libsdl1.2debian (>= 1.2.10-1)
+Installed-Size: 168
+Maintainer: Aurelien Jarno <aurel32@debian.org>
+Description: USB Video Class grabber
+ luvcview is a camera viewer for UVC based webcams. It includes an mjpeg
+ decoder and is able to save the video stream as an AVI file.
+ .
+  Homepage: http://luvcview.sourceforge.net
